@@ -104,7 +104,7 @@ export default function Settings() {
                               : {}
                           }
                         >
-                          {b}.0
+                          {Number.isInteger(b) ? `${b}.0` : b}
                         </button>
                       ))}
                     </div>
@@ -134,7 +134,7 @@ export default function Settings() {
                       {SKILL_LABELS[skill.id]}
                     </span>
                     <span className="text-xs text-gray-400 tabular-nums">
-                      {avg.toFixed(1)} / {skill.targetBand}.0
+                      {avg.toFixed(1)} / {Number.isInteger(skill.targetBand) ? `${skill.targetBand}.0` : skill.targetBand}
                     </span>
                   </div>
                   <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
