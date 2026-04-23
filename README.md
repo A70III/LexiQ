@@ -1,7 +1,41 @@
-# Tauri + React + Typescript
+# LexiQ - IELTS Tracker
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+Desktop application สำหรับติดตามผลคะแนน IELTS
 
-## Recommended IDE Setup
+## Features
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+- 📊 ติดตามคะแนน IELTS ทั้ง 4 ด้าน (Listening, Reading, Writing, Speaking)
+- 📈 แสดงกราฟความก้าวหน้า
+- 💾 เก็บข้อมูลแบบ local storage
+- 🖥️ Cross-platform (macOS, Windows, Linux)
+
+## Tech Stack
+
+- Tauri 2.x + React + TypeScript
+- Zustand (state management)
+- Recharts (charts)
+- Tailwind CSS
+
+## Download
+
+Download ได้ที่ [Release](https://github.com/A70III/LexiQ/releases)
+
+## Install
+
+```bash
+# macOS
+# ดับเบิลคลิก .dmg แล้วลาก LexiQ ไปไว้ใน Applications
+```
+
+## Dev
+
+```bash
+npm install
+npm run tauri dev
+```
+
+## Build
+
+```bash
+npm run tauri build
+```
