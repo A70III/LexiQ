@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+/* iOS Safe Area & Mobile-First Styles */
+:root {
+  --sat: env(safe-area-inset-top);
+  --sab: env(safe-area-inset-bottom);
+  --sal: env(safe-area-inset-left);
+  --sar: env(safe-area-inset-right);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+/* Safe area padding utilities */
+.safe-area-top { padding-top: var(--sat, 0); }
+.safe-area-bottom { padding-bottom: var(--sab, 0); }
+.safe-area-left { padding-left: var(--sal, 0); }
+.safe-area-right { padding-right: var(--sar, 0); }
+
+/* Large touch targets */
+button, [role="button"], a {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+/* iOS-style transitions */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D1D1D6; border-radius: 2px; }
+
+/* Drawer animation */
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.2s ease-out;
+}
+
+/* Hide scrollbar */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar { display: none; }

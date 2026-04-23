@@ -15,6 +15,7 @@
     "@tauri-apps/plugin-store": "^2.4.2",
     "@types/react-big-calendar": "^1.16.3",
     "date-fns": "^4.1.0",
+    "dexie": "^4.4.2",
     "react": "^19.1.0",
     "react-big-calendar": "^1.17.0",
     "react-dom": "^19.1.0",
@@ -31,6 +32,8 @@
     "@vitejs/plugin-react": "^4.6.0",
     "tailwindcss": "^4.2.4",
     "typescript": "~5.8.3",
-    "vite": "^7.0.4"
+    "vite": "^7.0.4",
+    "vite-plugin-pwa": "^1.2.0",
+    "workbox-webpack-plugin": "^7.4.0"
   }
 }

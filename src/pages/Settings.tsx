@@ -1,6 +1,6 @@
-import { useMemo } from "react";
 import { useAppStore } from "../store/useAppStore";
 import { SKILL_ICONS } from "../types/icons";
+import { syncFromMac, syncToMac } from "../lib/sync";
 
 const SKILL_LABELS: Record<string, string> = { listening: "Listening", reading: "Reading", writing: "Writing", speaking: "Speaking" };
 const SKILL_COLORS: Record<string, string> = { listening: "#007AFF", reading: "#34C759", writing: "#FF9500", speaking: "#FF2D55" };
@@ -8,169 +8,194 @@ const SKILL_COLORS: Record<string, string> = { listening: "#007AFF", reading: "#
 const TARGET_OPTIONS = [5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9];
 
 export default function Settings() {
-  const { skills, scores, updateSkillTarget } = useAppStore();
+  const { skills, scores, updateSkillTarget, serverAddress, setServerAddress, lastSyncDate, offline, resetAll } = useAppStore();
 
-  const currentBand = useMemo(() => {
-    const map: Record<string, number> = {};
-    for (const s of skills) {
-      const skillScores = scores.filter((sc) => sc.skillId === s.id);
-      if (skillScores.length > 0) {
-        map[s.id] = skillScores.reduce((sum, sc) => sum + sc.band, 0) / skillScores.length;
-      } else {
-        map[s.id] = 0;
-      }
-    }
-    return map;
-  }, [skills, scores]);
+  const currentBand: Record<string, number> = {};
+  for (const s of skills) {
+    const skillScores = scores.filter((sc) => sc.skillId === s.id);
+    currentBand[s.id] = skillScores.length > 0 
+      ? skillScores.reduce((sum, sc) => sum + sc.band, 0) / skillScores.length 
+      : 0;
+  }
 
   const handleTargetChange = (skillId: string, val: string) => {
     const band = parseFloat(val);
     if (band >= 1 && band <= 9) updateSkillTarget(skillId, band);
-  };
+  }
+
+  const handleSyncFromMac = async () => {
+    if (!serverAddress) return;
+    try {
+      await syncFromMac();
+    } catch (e) {
+      console.error("Sync error:", e);
+    }
+  }
+
+  const handleSyncToMac = async () => {
+    if (!serverAddress) return;
+    try {
+      await syncToMac();
+    } catch (e) {
+      console.error("Sync error:", e);
+    }
+  }
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-bold text-gray-800">Settings</h2>
+    <div className="min-h-screen bg-slate-50 pb-safe">
+      <div className="p-4 space-y-5">
+        <h1 className="text-xl font-bold text-slate-800 px-1">Settings</h1>
 
-      {/* Target Band — iOS-style picker cards */}
-      <div className="bg-white/85 backdrop-blur-sm rounded-xl p-5 shadow-sm border border-gray-100/80">
-        <h3 className="text-sm font-semibold text-gray-700 mb-1">ตั้งเป้าหมายคะแนน (Target Band)</h3>
-        <p className="text-xs text-gray-400 mb-5">กำหนดคะแนนที่ต้องการสำหรับแต่ละทักษะ</p>
+        {/* Sync Section */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-4">
+          <h2 className="text-base font-semibold text-slate-800">Sync with Mac</h2>
+          
+          <div>
+            <label className="text-xs text-slate-500 font-medium mb-2 block">Server Address</label>
+            <input
+              type="text"
+              value={serverAddress}
+              onChange={(e) => setServerAddress(e.target.value)}
+              placeholder="http://192.168.1.5:7878"
+              className="w-full px-4 py-3 text-base border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 outline-none bg-slate-50/80"
+            />
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {skills.map((skill) => {
-            const avg = currentBand[skill.id];
-            const diff = avg > 0 ? skill.targetBand - avg : 0;
-            const progressPct = avg > 0 ? Math.min(100, (avg / skill.targetBand) * 100) : 0;
+          <div className="flex gap-3">
+            <button
+              onClick={handleSyncFromMac}
+              disabled={!serverAddress || offline}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-500 text-white font-semibold rounded-xl text-sm active:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Sync From Mac
+            </button>
+            <button
+              onClick={handleSyncToMac}
+              disabled={!serverAddress || offline}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-green-500 text-white font-semibold rounded-xl text-sm active:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4 4l-4-4m0 0l4-4m-4 4h4" />
+              </svg>
+              Push To Mac
+            </button>
+          </div>
 
-            return (
-              <div
-                key={skill.id}
-                className="relative overflow-hidden rounded-xl border border-gray-100/80 bg-white/60"
-                style={{ borderLeft: `3px solid ${SKILL_COLORS[skill.id]}` }}
-              >
-                {/* Progress indicator strip */}
-                {avg > 0 && (
-                  <div
-                    className="absolute bottom-0 left-0 h-1 transition-all duration-500"
-                    style={{
-                      width: `${progressPct}%`,
-                      backgroundColor: progressPct >= 100 ? "#34C759" : SKILL_COLORS[skill.id],
-                    }}
-                  />
-                )}
+          {offline && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 text-amber-600 rounded-lg text-sm">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4 4 0 01-5.523-5.523m7.072 7.072l2.829 2.829" />
+              </svg>
+              Working offline
+            </div>
+          )}
 
-                <div className="p-4 space-y-3">
-                  {/* Header */}
-                  <div className="flex items-center gap-3">
-                    <span
-                      className="w-9 h-9 rounded-xl flex items-center justify-center text-base"
-                      style={{ backgroundColor: `${SKILL_COLORS[skill.id]}15` }}
-                    >
-                      {SKILL_ICONS[skill.id]}
-                    </span>
-                    <div className="flex-1">
-                      <span className="text-sm font-semibold text-gray-800">{SKILL_LABELS[skill.id]}</span>
-                      {avg > 0 && (
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="text-xs text-gray-500">ปัจจุบัน {avg.toFixed(1)}</span>
-                          <span className={`text-xs font-medium ${diff <= 0 ? "text-green-500" : diff <= 1 ? "text-yellow-500" : "text-red-400"}`}>
-                            ({diff <= 0 ? "ถึงเป้าแล้ว" : `ขาดอีก ${diff.toFixed(1)}`})
-                          </span>
-                        </div>
-                      )}
-                      {avg === 0 && (
-                        <p className="text-xs text-gray-400 mt-0.5">ยังไม่มีคะแนน</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Target picker */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-400 font-medium">Target:</span>
-                    <div className="flex gap-1 flex-wrap">
-                      {TARGET_OPTIONS.map((b) => (
-                        <button
-                          key={b}
-                          onClick={() => handleTargetChange(skill.id, String(b))}
-                          className={`px-2.5 py-1 text-xs font-medium rounded-lg transition-all cursor-pointer ${
-                            skill.targetBand === b
-                              ? "text-white shadow-sm"
-                              : "text-gray-500 hover:text-gray-700 hover:bg-gray-100 border border-gray-200"
-                          }`}
-                          style={
-                            skill.targetBand === b
-                              ? { backgroundColor: SKILL_COLORS[skill.id], borderColor: SKILL_COLORS[skill.id] }
-                              : {}
-                          }
-                        >
-                          {Number.isInteger(b) ? `${b}.0` : b}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {lastSyncDate && (
+            <p className="text-xs text-slate-400 text-center">Last sync: {new Date(lastSyncDate).toLocaleString('th-TH')}</p>
+          )}
         </div>
-      </div>
 
-      {/* Gap analysis summary */}
-      {skills.some((s) => currentBand[s.id] > 0) && (
-        <div className="bg-white/85 backdrop-blur-sm rounded-xl p-5 shadow-sm border border-gray-100/80">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">ภาพรวม Gap Analysis</h3>
-          <div className="space-y-2.5">
+        {/* Target Band */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-4">
+          <div>
+            <h2 className="text-base font-semibold text-slate-800">Target Band</h2>
+            <p className="text-xs text-slate-400 mt-1">Set your goal for each skill</p>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-3">
             {skills.map((skill) => {
-              const avg = currentBand[skill.id];
-              if (avg === 0) return null;
-              const gap = skill.targetBand - avg;
-              const pct = Math.min(100, (avg / skill.targetBand) * 100);
+              const avg = currentBand[skill.id] || 0;
+              const diff = skill.targetBand - avg;
+              
               return (
-                <div key={skill.id}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-gray-600 flex items-center gap-1.5">
-                      <span>{SKILL_ICONS[skill.id]}</span>
-                      {SKILL_LABELS[skill.id]}
-                    </span>
-                    <span className="text-xs text-gray-400 tabular-nums">
-                      {avg.toFixed(1)} / {Number.isInteger(skill.targetBand) ? `${skill.targetBand}.0` : skill.targetBand}
-                    </span>
+                <div 
+                  key={skill.id} 
+                  className="relative overflow-hidden rounded-xl border border-slate-100 bg-slate-50/50"
+                  style={{ borderLeft: `4px solid ${SKILL_COLORS[skill.id]}` }}
+                >
+                  <div className="p-4 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="w-10 h-10 rounded-xl flex items-center justify-center text-lg"
+                        style={{ backgroundColor: `${SKILL_COLORS[skill.id]}20` }}
+                      >
+                        {SKILL_ICONS[skill.id]}
+                      </div>
+                      <div className="flex-1">
+                        <span className="text-sm font-semibold text-slate-800">{SKILL_LABELS[skill.id]}</span>
+                        {avg > 0 && (
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-xs text-slate-500">Current: {avg.toFixed(1)}</span>
+                            <span className={`text-xs font-medium ${diff <= 0 ? 'text-green-500' : diff <= 1 ? 'text-yellow-500' : 'text-red-400'}`}>
+                              ({diff <= 0 ? 'At target' : `Gap ${diff.toFixed(1)}`})
+                            </span>
+                          </div>
+                        )}
+                        {avg === 0 && (
+                          <p className="text-xs text-slate-400 mt-0.5">No scores yet</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-slate-400 font-medium shrink-0">Target:</span>
+                      <div className="flex gap-1 flex-wrap">
+                        {TARGET_OPTIONS.map((b) => (
+                          <button
+                            key={b}
+                            onClick={() => handleTargetChange(skill.id, String(b))}
+                            className={`min-w-[44px] h-8 text-xs font-semibold rounded-lg cursor-pointer transition-all ${
+                              skill.targetBand === b
+                                ? 'text-white shadow-sm'
+                                : 'text-slate-600 hover:bg-slate-200 border border-slate-200'
+                            }`}
+                            style={skill.targetBand === b ? { backgroundColor: SKILL_COLORS[skill.id] } : {}}
+                          >
+                            {Number.isInteger(b) ? `${b}.0` : b}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                  <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${pct}%`,
-                        background: gap <= 0
-                          ? "linear-gradient(90deg, #34C759, #30D158)"
-                          : `linear-gradient(90deg, ${SKILL_COLORS[skill.id]}, ${SKILL_COLORS[skill.id]}88)`,
-                      }}
-                    />
-                  </div>
-                  {gap > 0 && (
-                    <p className="text-[10px] text-gray-400 mt-0.5">Gap: {gap.toFixed(1)}</p>
-                  )}
                 </div>
-              );
+              )
             })}
           </div>
         </div>
-      )}
 
-      {/* About */}
-      <div className="bg-white/85 backdrop-blur-sm rounded-xl p-5 shadow-sm border border-gray-100/80">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">เกี่ยวกับ</h3>
-        <div className="flex items-start gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-sm shrink-0">
-            <span className="text-2xl font-bold text-white">L</span>
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm font-semibold text-gray-800">LexiQ</p>
-            <p className="text-xs text-gray-400">v1.0</p>
-            <p className="text-xs text-gray-400">ติดตามผลการเรียน IELTS</p>
-            <p className="text-xs text-gray-400 mt-2">สร้างด้วย Tauri + React</p>
-            <p className="text-xs text-gray-400">ข้อมูลทั้งหมดถูกเก็บในเครื่องของคุณเท่านั้น</p>
+        {/* Reset */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+          <button
+            onClick={async () => {
+              if (confirm('ลบข้อมูลทั้งหมด?')) {
+                await resetAll();
+              }
+            }}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-600 font-semibold rounded-xl text-sm hover:bg-red-100 active:bg-red-200 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Reset All Data
+          </button>
+        </div>
+
+        {/* About */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+          <div className="flex items-start gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-sm shrink-0">
+              <span className="text-2xl font-bold text-white">L</span>
+            </div>
+            <div className="space-y-1">
+              <p className="text-base font-semibold text-slate-800">LexiQ</p>
+              <p className="text-xs text-slate-400">v1.1 (PWA - Offline First)</p>
+              <p className="text-xs text-slate-400">IELTS Score Tracker</p>
+              <p className="text-xs text-slate-400 mt-2">Built with React + Dexie + IndexedDB</p>
+              <p className="text-xs text-slate-400">Data stored securely on device</p>
+            </div>
           </div>
         </div>
       </div>

@@ -51,8 +51,8 @@ export interface AppData {
   skills: Skill[];
   courses: Course[];
   scores: ScoreRecord[];
-  studyPlans?: StudyPlan[];
-  goals?: Goal[];
+  studyPlans: StudyPlan[];
+  goals: Goal[];
 }
 
 export const DEFAULT_SKILLS: Skill[] = [
