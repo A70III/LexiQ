@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { HiOutlineChartBarSquare, HiOutlineBookOpen, HiOutlinePencilSquare, HiOutlineTrophy, HiOutlineCalendar, HiOutlineCog6Tooth } from "react-icons/hi2";
+import SyncStatus from "./SyncStatus";
 
 const navItems = [
   { to: "/", icon: HiOutlineChartBarSquare, label: "Dashboard" },
@@ -48,8 +49,8 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="px-6 py-4 border-t border-gray-100">
-        <p className="text-[10px] text-gray-300 font-medium">LexiQ v1.0</p>
+      <div className="mt-auto">
+        <SyncStatus />
       </div>
     </div>
   );
