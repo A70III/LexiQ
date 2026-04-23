@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { HiOutlineChartBarSquare, HiOutlineBookOpen, HiOutlinePencilSquare, HiOutlineTrophy, HiOutlineCalendar, HiOutlineFlag, HiOutlineCog6Tooth } from "react-icons/hi2";
+import { HiOutlineChartBarSquare, HiOutlineBookOpen, HiOutlinePencilSquare, HiOutlineTrophy, HiOutlineCalendar, HiOutlineCog6Tooth } from "react-icons/hi2";
 
 const navItems = [
   { to: "/", icon: HiOutlineChartBarSquare, label: "Dashboard" },
@@ -7,7 +7,6 @@ const navItems = [
   { to: "/courses", icon: HiOutlinePencilSquare, label: "Courses" },
   { to: "/scores", icon: HiOutlineTrophy, label: "Scores" },
   { to: "/schedule", icon: HiOutlineCalendar, label: "Schedule" },
-  { to: "/goals", icon: HiOutlineFlag, label: "Goals" },
   { to: "/settings", icon: HiOutlineCog6Tooth, label: "Settings" },
 ];
 

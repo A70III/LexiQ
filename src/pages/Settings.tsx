@@ -24,7 +24,7 @@ export default function Settings() {
   }, [skills, scores]);
 
   const handleTargetChange = (skillId: string, val: string) => {
-    const band = parseInt(val);
+    const band = parseFloat(val);
     if (band >= 1 && band <= 9) updateSkillTarget(skillId, band);
   };
 

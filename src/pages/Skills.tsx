@@ -73,9 +73,9 @@ export default function Skills() {
                     <span className="text-xs text-gray-400">
                       {skill.latestBand > 0 ? `เฉลี่ย ${skill.avgBand.toFixed(1)}` : "ยังไม่มีคะแนน"}
                     </span>
-                    <span className="text-[10px] text-purple-500 font-medium bg-purple-50 px-1.5 py-0.5 rounded">
-                      Target {skill.targetBand}.0
-                    </span>
+<span className="text-[10px] text-purple-500 font-medium bg-purple-50 px-1.5 py-0.5 rounded">
+                       Target {Number.isInteger(skill.targetBand) ? `${skill.targetBand}.0` : skill.targetBand}
+                     </span>
                   </div>
                 </div>
                 {/* Mini progress ring indicator */}
@@ -112,7 +112,7 @@ export default function Skills() {
                   <span className="text-[10px] text-gray-400">
                     {skill.latestBand > 0
                       ? `Gap: ${(skill.targetBand - skill.latestBand).toFixed(1)}`
-                      : `Target: ${skill.targetBand}.0`}
+                      : `Target: ${Number.isInteger(skill.targetBand) ? `${skill.targetBand}.0` : skill.targetBand}`}
                   </span>
                 </div>
               </div>

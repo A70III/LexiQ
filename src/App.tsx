@@ -7,7 +7,6 @@ import Skills from "./pages/Skills";
 import Courses from "./pages/Courses";
 import Scores from "./pages/Scores";
 import Schedule from "./pages/Schedule";
-import Goals from "./pages/Goals";
 import Settings from "./pages/Settings";
 
 function LoadingScreen() {
@@ -56,7 +55,6 @@ export default function App() {
         <Route path="courses" element={<Courses />} />
         <Route path="scores" element={<Scores />} />
         <Route path="schedule" element={<Schedule />} />
-        <Route path="goals" element={<Goals />} />
         <Route path="settings" element={<Settings />} />
       </Route>
     </Routes>
