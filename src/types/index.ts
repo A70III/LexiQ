@@ -26,10 +26,33 @@ export interface ScoreRecord {
   notes?: string;
 }
 
+export interface StudyPlan {
+  id: string;
+  title: string;
+  skillId: string;
+  courseId?: string;
+  date: string; // YYYY-MM-DD
+  completed: boolean;
+  notes?: string;
+  createdAt: string;
+}
+
+export interface Goal {
+  id: string;
+  skillId: string;
+  targetBand: number;
+  targetDate: string;
+  achieved: boolean;
+  achievedDate?: string;
+  createdAt: string;
+}
+
 export interface AppData {
   skills: Skill[];
   courses: Course[];
   scores: ScoreRecord[];
+  studyPlans?: StudyPlan[];
+  goals?: Goal[];
 }
 
 export const DEFAULT_SKILLS: Skill[] = [
